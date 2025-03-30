@@ -4,9 +4,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { signOut, useSession } from "@/lib/better-auth/auth-client";
-import { LogOut } from "lucide-react";
+import {
+  CircleUser,
+  LogOut,
+  ReceiptText,
+  ShieldUser,
+  User,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useState } from "react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Session } from "@/lib/better-auth/type.auth";
+import Link from "next/link";
 
 const SidebarProfile = () => {
   const route = useRouter();
@@ -17,12 +34,7 @@ const SidebarProfile = () => {
     <>
       {!isPending && data && (
         <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9">
-            <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-            <AvatarFallback className="bg-accent text-accent-foreground">
-              {data?.user.name.slice(0, 1) || "U"}
-            </AvatarFallback>
-          </Avatar>
+          <ProfileDropdown data={data} />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-foreground truncate">
               {data?.user.name}
@@ -72,6 +84,43 @@ export const ProfileSkeleton = () => {
       </div>
       <Skeleton className="h-8 w-8 rounded-md" />
     </div>
+  );
+};
+
+export const ProfileDropdown = ({ data }: { data: Session }) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <Avatar className="h-9 w-9 cursor-pointer">
+          <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+          <AvatarFallback className="bg-accent text-accent-foreground">
+            {data?.user.name.slice(0, 1) || "U"}
+          </AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          <User />
+          Profile Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <CircleUser />
+          Account Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <ReceiptText />
+          Billing
+        </DropdownMenuItem>
+        <Link href="/admin">
+          <DropdownMenuItem>
+            <ShieldUser />
+            Admin
+          </DropdownMenuItem>
+        </Link>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
