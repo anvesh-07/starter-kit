@@ -2,6 +2,8 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./_components/app-sidebar";
 import Header from "./_components/header";
 
+// export const dynamic = "force-dynamic";
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <main>

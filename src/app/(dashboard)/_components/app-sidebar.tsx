@@ -3,7 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -13,10 +12,9 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { navLinks } from "@/lib/constants/navlinks.constants";
 import Logo from "@/components/global/logo";
+import SidebarProfile from "./sidebar-profile";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -50,29 +48,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="px-4 py-3 border-t border-border">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9">
-            <AvatarImage src="/avatar.png" alt="User" />
-            <AvatarFallback className="bg-accent text-accent-foreground">
-              U
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">
-              John Doe
-            </p>
-            <p className="text-xs text-muted-foreground truncate">
-              john@example.com
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
+        <SidebarProfile />
       </SidebarFooter>
     </Sidebar>
   );

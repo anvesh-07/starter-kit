@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const password = z
+export const password = z
   .string()
   .min(8, { message: "Password must be at least 8 characters" })
   .regex(/[A-Z]/, {

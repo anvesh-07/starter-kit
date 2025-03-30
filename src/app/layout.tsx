@@ -4,6 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import Provider from "@/context/provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -33,7 +35,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <Provider>{children}</Provider>
+          <Toaster closeButton={true} position="top-right" />
         </ThemeProvider>
       </body>
     </html>

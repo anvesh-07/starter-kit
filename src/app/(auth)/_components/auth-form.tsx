@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2Icon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,10 @@ import {
   TSignUpForm,
 } from "@/lib/zod/auth.zod";
 import { GitHubIcon } from "@/components/icon/github";
+import { useMutation } from "@tanstack/react-query";
+import { authClient } from "@/lib/better-auth/auth-client";
+import { toast } from "sonner";
+import { P } from "@/components/global/p";
 
 const AuthForm = ({ action }: { action: "in" | "up" }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -43,25 +47,121 @@ const AuthForm = ({ action }: { action: "in" | "up" }) => {
     },
   });
 
-  function onSignUpSubmit(values: TSignUpForm) {
-    console.log(values);
-    // Handle sign up submission
-  }
+  const mutationForgetPassword = useMutation({
+    mutationFn: async () => {
+      const email = signInForm.watch("email");
 
-  function onSignInSubmit(values: TSignInForm) {
-    console.log(values);
-    // Handle sign in submission
-  }
+      if (!email) {
+        throw new Error("Email address is required for password reset");
+      }
+
+      const { data, error } = await authClient.forgetPassword({
+        email,
+        redirectTo: "/reset-password",
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Password Reset Email Sent", {
+        description: "Check your email for password reset instructions.",
+      });
+    },
+    onError: (e) => {
+      toast.error(e.name, {
+        description: e.message,
+      });
+    },
+  });
+
+  const { mutateAsync: onSignUpSubmit, isPending: isSigning } = useMutation({
+    mutationFn: async (values: TSignUpForm) => {
+      const { error, data } = await authClient.signUp.email({
+        ...values,
+        callbackURL: "/dashboard",
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    onError: (e) => {
+      toast.error(e.name || "Error!", {
+        description: e.message,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Sign up completed", {
+        description: "Redirecting you to the dashboard...",
+      });
+    },
+  });
+
+  const { mutateAsync: onSignInSubmit, isPending: isLogging } = useMutation({
+    mutationFn: async (values: TSignInForm) => {
+      const { error, data } = await authClient.signIn.email({
+        ...values,
+        callbackURL: "/dashboard",
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    onError: (e) => {
+      toast.error(e.name || "Error!", {
+        description: e.message,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Sign in completed", {
+        description: "Redirecting you to the dashboard...",
+      });
+    },
+  });
 
   function GitHubButton() {
+    const { mutateAsync, isPending } = useMutation({
+      mutationFn: async () => {
+        await authClient.signIn.social({
+          provider: "github",
+          callbackURL: "/dashboard",
+        });
+
+        return "Success";
+      },
+      onError: (e) => {
+        toast.error(e.name || "Error!", {
+          description: e.message,
+        });
+      },
+      onSuccess: () => {
+        toast.success("GitHub Sign In Initiated", {
+          description: "Redirecting you to GitHub authentication...",
+        });
+      },
+    });
     return (
       <Button
         type="button"
         variant="outline"
         className="w-full border-border"
-        onClick={() => {}}
+        onClick={() => mutateAsync()}
+        disabled={isPending}
       >
-        <GitHubIcon className="mr-2 h-4 w-4" />
+        {!isPending ? (
+          <GitHubIcon className="mr-2 h-4 w-4" />
+        ) : (
+          <Loader2Icon className="animate-spin mr-2 h-4 w-4" />
+        )}
         GitHub
       </Button>
     );
@@ -85,7 +185,9 @@ const AuthForm = ({ action }: { action: "in" | "up" }) => {
           // Sign Up Form
           <Form {...signUpForm}>
             <form
-              onSubmit={signUpForm.handleSubmit(onSignUpSubmit)}
+              onSubmit={signUpForm.handleSubmit((values) =>
+                onSignUpSubmit(values)
+              )}
               className="space-y-6"
             >
               <FormField
@@ -157,8 +259,13 @@ const AuthForm = ({ action }: { action: "in" | "up" }) => {
                 <Button
                   type="submit"
                   className="w-full bg-primary text-primary-foreground"
+                  disabled={isSigning}
                 >
-                  Sign up with Email
+                  {!isSigning ? (
+                    "Sign up with Email"
+                  ) : (
+                    <Loader2Icon className="animate-spin" />
+                  )}
                 </Button>
 
                 <div className="relative">
@@ -199,7 +306,9 @@ const AuthForm = ({ action }: { action: "in" | "up" }) => {
           // Sign In Form
           <Form {...signInForm}>
             <form
-              onSubmit={signInForm.handleSubmit(onSignInSubmit)}
+              onSubmit={signInForm.handleSubmit((values) =>
+                onSignInSubmit(values)
+              )}
               className="space-y-6"
             >
               <FormField
@@ -254,20 +363,29 @@ const AuthForm = ({ action }: { action: "in" | "up" }) => {
               />
 
               <div className="flex justify-end">
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
+                {!mutationForgetPassword.isPending ? (
+                  <P
+                    className="cursor-pointer hover:underline ease-in-out duration-200"
+                    onClick={() => mutationForgetPassword.mutateAsync()}
+                  >
+                    Forget Password
+                  </P>
+                ) : (
+                  <Loader2Icon className="size-4 animate-spin" />
+                )}
               </div>
 
               <div className="space-y-4">
                 <Button
                   type="submit"
                   className="w-full bg-primary text-primary-foreground"
+                  disabled={isLogging}
                 >
-                  Sign in
+                  {!isLogging ? (
+                    "Sign in"
+                  ) : (
+                    <Loader2Icon className="animate-spin" />
+                  )}
                 </Button>
 
                 <div className="relative">
