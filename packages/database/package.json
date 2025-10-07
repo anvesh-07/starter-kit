@@ -1,0 +1,43 @@
+{
+  "name": "@socio_suite/database",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js"
+    },
+    "./drizzle": {
+      "types": "./build/lib/drizzle/root.d.ts",
+      "import": "./build/lib/drizzle/root.js"
+    },
+    "./schema": {
+      "types": "./build/lib/schema/export.schema.d.ts",
+      "import": "./build/lib/schema/export.schema.js"
+    },
+    "./schema-type": {
+      "types": "./build/lib/schema/export-schema.type.d.ts",
+      "import": "./build/lib/schema/export-schema.type.js"
+    }
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "db:push": "drizzle-kit push",
+    "db:gen": "drizzle-kit generate",
+    "db:mig": "drizzle-kit migrate",
+    "mig:drop": "drizzle-kit drop",
+    "db:studio": "drizzle-kit studio"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3",
+    "drizzle-kit": "^0.30.6",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.6",
+    "postgres": "^3.4.7"
+  }
+}

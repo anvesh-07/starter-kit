@@ -1,0 +1,12 @@
+{
+  "name": "@socio_suite/utils",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
